@@ -1,6 +1,6 @@
 # React_TeamProject
 
-Advanced web programming for the first semester of the third grade - FrontEnd Team Project
+React Project
 
 # How to execute?
 
@@ -24,6 +24,10 @@ npm install 하면 dependency 에러가 발생하는 경우가 있다. 이 경�
 
 ```
 npm install --save --legacy-peer-deps
+
+or
+
+npm install --legacy-peer-deps
 ```
 
 ---
@@ -35,25 +39,25 @@ npm install --save --legacy-peer-deps
 
 ## 요구사항 정의
 
-1. 메인페이지 + 드론 택시 설명 글 @MinhoJJang              
+1. 메인페이지 + 드론 택시 설명 글 @MinhoJJang  
    완료
 
-2. 회원가입 페이지             
+2. 회원가입 페이지  
    아직 데이터베이스와 연결하지 못하므로, 관리자 아이디를 하나 정의하고, 그 아이디일때 로그인 성공하도록 만들면 될 듯 하다.
 
-3. 드론 택시 예약 페이지              
+3. 드론 택시 예약 페이지  
    드론 택시의 종류를 갤러리 형식으로 보여준다.
    해당 드론 택시를 선택하면 예약이 완료되고, 드론 택시 예약 현황 페이지에 넘겨준다.
    (가능한가?)
    만약 안된다면
 
-4. 드론 택시 예약 현황 페이지           
+4. 드론 택시 예약 현황 페이지  
    사용자가 예약한 드론 택시가 있다면 보여준다.
 
-5. 드론 택시 리뷰 페이지             
+5. 드론 택시 리뷰 페이지  
    사용자가 사용한 드론에 대한 리뷰를 보여준다.
- 
-6. 드론 택시 예약 결제 페이지                  
+
+6. 드론 택시 예약 결제 페이지  
    +? 추가?
    실제 결제는 아니지만 결제할 수 있는 버튼을 추가하는 것도..? 괜찮을 것 같다.
 
