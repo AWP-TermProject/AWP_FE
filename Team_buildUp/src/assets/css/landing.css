@@ -37,11 +37,11 @@
   }
 
 .img{
-    position: relative;
-    background-image: url(../img/uriel-soberanes.jpg);                                                               
-    /* height: 100vh; */
-    background-size: cover;
-    
+  background-image: url(../img/uriel-soberanes.jpg);                                                               
+  height : 400px;
+  overflow : auto;
+        
+        
     
 }
 

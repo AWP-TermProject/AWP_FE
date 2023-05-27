@@ -16,12 +16,13 @@
 * The above copyright notice and this permission notice shall be included in all copies or substantial portions of the Software.
 
 */
-import React from "react";
+import React, { useEffect } from "react";
 import "../../assets/css/landing.css"
 import { CKEditor } from '@ckeditor/ckeditor5-react';
 import ClassicEditor from '@ckeditor/ckeditor5-build-classic';
 import { useState } from 'react';
 import Parser from 'html-react-parser';
+import Axios from 'axios';
 
 // reactstrap components
 // import { Button, Container } from "reactstrap";
@@ -50,6 +51,21 @@ function LandingPageHeader() {
   })
 
   const [viewContent, setViewContent] = useState([]);
+
+  useEffect(() =>{
+    Axios.get('http://localhost:3000/landing-page/get').then((response)=>{
+      setViewContent(response.data);
+    })
+  },[viewContent])
+
+  const submitReview = ()=>{
+    Axios.post('http://localhost:3000/landing-page/insert', {
+      title: movieContent.title,
+      content: movieContent.title
+    }).then(()=>{
+      alert('등록 완료!');
+    })
+  };
   
 
   const getValue = e => {
@@ -119,10 +135,10 @@ function LandingPageHeader() {
           }}
         />
       </div>
-      <button className="submit-button" onClick={()=>{
-        setViewContent(viewContent.concat({...movieContent}));
-      }
-      }>입력</button>
+      <button 
+        className="submit-button" 
+        onClick={submitReview}
+      >입력</button>
      </div>
      <br/><br/><br/><br/><br/><br/><br/><br/>
      
