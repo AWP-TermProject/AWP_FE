@@ -53,15 +53,15 @@ function LandingPageHeader() {
   const [viewContent, setViewContent] = useState([]);
 
   useEffect(() =>{
-    Axios.get('http://localhost:3000/landing-page/get').then((response)=>{
+    Axios.get('http://localhost:8082/api/reviews').then((response)=>{
       setViewContent(response.data);
     })
   },[viewContent])
 
   const submitReview = ()=>{
-    Axios.post('http://localhost:3000/landing-page/insert', {
+    Axios.post('http://localhost:8082/api/review', {
       title: movieContent.title,
-      content: movieContent.title
+      content: movieContent.content
     }).then(()=>{
       alert('등록 완료!');
     })
@@ -87,12 +87,12 @@ function LandingPageHeader() {
 
         }}
       > */}
-      <div class="img">
+      <div className="img">
       <div className="text-center">
     <br />
     <br />
     <br />
-      <h1 class="drone-review"><strong>Drone Review</strong></h1>
+      <h1 className="drone-review"><strong>Drone Review</strong></h1>
       <div className='movie-container'>
         {viewContent.map(element=>
           <div>
