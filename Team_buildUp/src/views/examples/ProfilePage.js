@@ -17,7 +17,10 @@
 
 */
 import React from "react";
-
+import axios from "axios";
+import { useDispatch } from "react-redux";
+import { reserveDrone } from "../../Dronereservation/actions";
+import { toast } from "react-toastify";
 // reactstrap components
 import {
   Button,
@@ -38,7 +41,7 @@ import {
 } from "reactstrap";
 
 // core components
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import Slider from "nouislider";
 import SectionButtons from "views/index-sections/SectionButtons";
 import SectionCarousel from "views/index-sections/SectionCarousel.js";
@@ -47,12 +50,44 @@ import ProfilePageHeader from "components/Headers/ProfilePageHeader.js";
 import DemoFooter from "components/Footers/DemoFooter.js";
 import IndexNavbar from "components/Navbars/IndexNavbar";
 import ReactDatetime from "react-datetime";
+import { ToastContainer } from "react-toastify";
+
+const baseUrl = "http://localhost:8081";
 
 function ProfilePage() {
-  const [activeTab, setActiveTab] = React.useState("1");
+  const [activeTab, setActiveTab] = useState("1");
   const [selectedDate, setSelectedDate] = useState("");
   const [selectedTime, setSelectedTime] = useState("");
   const [username, setUsername] = useState("");
+
+  const [drone1, setDrone1] = useState(false);
+  const [drone2, setDrone2] = useState(false);
+  const [drone3, setDrone3] = useState(false);
+
+  const [reservations, setReservations] = useState([]);
+
+  const fetchReservations = async () => {
+    try {
+      const response = await axios.get(baseUrl + "/api/register");
+      if (response.status === 200) {
+        setReservations(response.data);
+      }
+    } catch (error) {
+      console.error(error);
+    }
+  };
+  useEffect(() => {
+    fetchReservations(); // 컴포넌트가 마운트될 때 예약 정보 로드
+    //... 기존 useEffect 내용
+  }, []); // 빈 dependency array로 useEffect 실행 시점을 한 번만(마운트될 때)로 설정
+
+  const dispatch = useDispatch();
+  const [popup, setPopup] = useState({
+    open: false,
+    title: "",
+    message: "",
+    callback: false,
+  });
 
   const handleUsernameChange = (e) => {
     setUsername(e.target.value);
@@ -64,6 +99,36 @@ function ProfilePage() {
     }
   };
 
+  const submitReservation = async () => {
+    // 드론 타입 결정
+    let droneType;
+    if (drone1) droneType = "OUROBOROS_SC14";
+    else if (drone2) droneType = "DIVE_4KSC13";
+    else if (drone3) droneType = "PUPA_MX13SC15";
+    else {
+      toast.error("Please select a drone before submitting.");
+      return;
+    }
+
+    // API 호출
+    try {
+      const response = await axios.post(baseUrl + "/api/register", {
+        username,
+        reservationDate: selectedDate + " " + selectedTime,
+        droneType,
+      });
+      if (response.status === 200) {
+        toast.success("Reservation submitted successfully.");
+        dispatch(reserveDrone(response.data)); // 드론 예약 상태 업데이트 액션 디스패치
+        fetchReservations();
+      } else {
+        toast.error("Failed to submit reservation. Please try again.");
+      }
+    } catch (error) {
+      console.error(error);
+      toast.error("An error occurred. Please try again.");
+    }
+  };
   document.documentElement.classList.remove("nav-open");
   React.useEffect(() => {
     document.body.classList.add("landing-page");
@@ -73,6 +138,7 @@ function ProfilePage() {
   });
   return (
     <>
+      <ToastContainer />
       <IndexNavbar />
       <ProfilePageHeader />
 
@@ -141,9 +207,14 @@ function ProfilePage() {
                           <FormGroup check>
                             <Label check>
                               <Input
-                                defaultChecked
+                                checked={drone1}
                                 defaultValue=""
                                 type="checkbox"
+                                onChange={() => {
+                                  setDrone1(!drone1);
+                                  setDrone2(false);
+                                  setDrone3(false);
+                                }}
                               />
                               <span className="form-check-sign" />
                             </Label>
@@ -169,7 +240,16 @@ function ProfilePage() {
                         <Col lg="3" md="4" xs="4">
                           <FormGroup check>
                             <Label check>
-                              <Input defaultValue="" type="checkbox" />
+                              <Input
+                                checked={drone2}
+                                defaultValue=""
+                                type="checkbox"
+                                onChange={() => {
+                                  setDrone1(false);
+                                  setDrone2(!drone2);
+                                  setDrone3(false);
+                                }}
+                              />
                               <span className="form-check-sign" />
                             </Label>
                           </FormGroup>
@@ -194,7 +274,16 @@ function ProfilePage() {
                         <Col lg="3" md="4" xs="4">
                           <FormGroup check>
                             <Label check>
-                              <Input defaultValue="" type="checkbox" />
+                              <Input
+                                checked={drone3}
+                                defaultValue=""
+                                type="checkbox"
+                                onChange={() => {
+                                  setDrone1(false);
+                                  setDrone2(false);
+                                  setDrone3(!drone3);
+                                }}
+                              />
                               <span className="form-check-sign" />
                             </Label>
                           </FormGroup>
@@ -256,7 +345,11 @@ function ProfilePage() {
                       </Row>
                     </li>
                     <hr />
-                    <Button className="btn-round" color="success">
+                    <Button
+                      className="btn-round"
+                      color="success"
+                      onClick={submitReservation}
+                    >
                       <i className="fa fa-cog" /> Register
                     </Button>
                   </ul>
@@ -266,9 +359,15 @@ function ProfilePage() {
 
             <TabPane className="text-center" tabId="2" id="following">
               <div>
-                <p>Date: {selectedDate}</p>
-                <p>Time: {selectedTime}</p>
-                <p>Username: {username}</p>
+                {/* 예약 정보 출력 */}
+                {reservations.map((reservation, index) => (
+                  <div key={index}>
+                    <p>DroneType: {reservation.droneType}</p>
+                    <p>DateTime: {reservation.reservationDate}</p>
+                    <p>Username: {reservation.username}</p>
+                    <hr />
+                  </div>
+                ))}
               </div>
             </TabPane>
           </TabContent>
