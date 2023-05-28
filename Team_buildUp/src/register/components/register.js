@@ -1,152 +1,131 @@
-/*!
+import React, {useState} from 'react';
+import {useSelector, useDispatch} from 'react-redux';
+import styled from "styled-components";
+import {inputUser, inputEmail, inputPassword, inputConfirmPassword, errConfirmPassword} from '../modules/registerSlice';
+import Popup from './Popup';
+import "../../assets/css/register.css"
+import { Button} from "reactstrap";
+import IndexNavbar from "components/Navbars/IndexNavbar";
+import axios from 'axios';
 
-=========================================================
-* Paper Kit React - v1.3.1
-=========================================================
+const Layout = styled.div`
+margin-top: 10px;
+padding: 20px;
+text-align: center;
+`;
 
-* Product Page: https://www.creative-tim.com/product/paper-kit-react
+const baseUrl = "http://localhost:8083";
 
-* Copyright 2022 Creative Tim (https://www.creative-tim.com)
-* Licensed under MIT (https://github.com/creativetimofficial/paper-kit-react/blob/main/LICENSE.md)
-
-* Coded by Creative Tim
-
-=========================================================
-
-* The above copyright notice and this permission notice shall be included in all copies or substantial portions of the Software.
-
-*/
-import React, { useEffect } from "react";
-import "../../assets/css/landing.css"
-import { CKEditor } from '@ckeditor/ckeditor5-react';
-import ClassicEditor from '@ckeditor/ckeditor5-build-classic';
-import { useState } from 'react';
-import Parser from 'html-react-parser';
-import Axios from 'axios';
-
-// reactstrap components
-// import { Button, Container } from "reactstrap";
-
-// core components
-
-function LandingPageHeader() {
-  let pageHeader = React.createRef();
-
-  React.useEffect(() => {
-    if (window.innerWidth < 991) {
-      const updateScroll = () => {
-        let windowScrollTop = window.pageYOffset / 3;
-        pageHeader.current.style.transform =
-          "translate3d(0," + windowScrollTop + "px,0)";
-      };
-      window.addEventListener("scroll", updateScroll);
-      return function cleanup() {
-        window.removeEventListener("scroll", updateScroll);
-      };
-    }
-  });
-  const [movieContent, setMovieContent] = useState({
-    title: '',
-    content: ''
-  })
-
-  const [viewContent, setViewContent] = useState([]);
-
-  useEffect(() =>{
-    Axios.get('http://localhost:8082/api/reviews').then((response)=>{
-      setViewContent(response.data);
-    })
-  },[viewContent])
-
-  const submitReview = ()=>{
-    Axios.post('http://localhost:8082/api/review', {
-      title: movieContent.title,
-      content: movieContent.content
-    }).then(()=>{
-      alert('등록 완료!');
-    })
-  };
-  
-
-  const getValue = e => {
-    const { name, value } = e.target
-    setMovieContent({
-      ...movieContent,
-      [name]: value
-    })
-    console.log(movieContent);
-  };
-
-  return (
-    <>
-    
-      {/* <div
-        className="page-header section-dark"
-        style={{
-          backgroundImage: "url(" + require("assets/img/antoine-barres.jpg") + ")",
-
-        }}
-      > */}
-      <div className="img">
-      <div className="text-center">
-    <br />
-    <br />
-    <br />
-      <h1 className="drone-review"><strong>Drone Review</strong></h1>
-      <div className='movie-container'>
-        {viewContent.map(element=>
-          <div>
-            <h2>{element.title}</h2>
-            <div>
-             {Parser(element.content)}
-            </div>
-          </div>
-        )}
-      </div>
-      
-      <div className='form-wrapper'>
-        <input className="title-input"
-          type='text'
-          placeholder='제목'
-          onChange={getValue}
-          name='title'
-        />
-        <CKEditor
-          editor={ClassicEditor}
-          data="리뷰 내용을 입력해주세요!"
-          onReady={editor => {
-            // You can store the "editor" and use when it is needed.
-            console.log('Editor is ready to use!', editor);
-          }}
-          onChange={(event, editor) => {
-            const data = editor.getData();
-            console.log({ event, editor, data });
-            setMovieContent({
-              ...movieContent,
-              content: data
-            })
-            console.log(movieContent);
-          }}
-          onBlur={(event, editor) => {
-            console.log('Blur.', editor);
-          }}
-          onFocus={(event, editor) => {
-            console.log('Focus.', editor);
-          }}
-        />
-      </div>
-      <button 
-        className="submit-button" 
-        onClick={submitReview}
-      >입력</button>
-     </div>
-     <br/><br/><br/><br/><br/><br/><br/><br/>
-     
-     {/* </div> */}
-     {/* <div class="img-cover"></div> */}
-     </div>
-    </>
-  );
+function handleClick(e){
+    window.location.href="/register-page"
 }
 
-export default LandingPageHeader;
+const Register = (props) => {
+    const username = useSelector(state=>state.user);
+    const email = useSelector(state=>state.email);
+    const password = useSelector(state=>state.password);
+    const confirmPassword = useSelector(state=>state.confirmPassword);
+    const [popup, setPopup] = useState({open: false, title: "", message: "", callback: false});
+    const dispatch = useDispatch();
+
+
+    const handleOnUser = (e) =>{
+        dispatch(inputUser(e.target.value));
+    }
+    const handleOnEmail = (e) =>{
+        dispatch(inputEmail(e.target.value));
+    }
+    const handleOnPassword = (e) =>{
+        dispatch(inputPassword(e.target.value));
+    }
+    const handleOnConfirmPassword = (e) =>{
+        dispatch(inputConfirmPassword(e.target.value));
+    }
+    const handleSubmit = async(e) => {
+        console.log("TRY submit to server!!");
+        //e.preventDefault();
+        await axios
+        .post(baseUrl+"/api/user",{
+            name:username,
+            email:email,
+            password:password,
+        })
+        .then((response)=>{
+            console.log(response.data);
+        })
+        .catch((error)=>{
+            console.log(error);
+        });
+    }
+
+    const onSubmit = (e) => {
+        console.log("submit clicked!!!")
+        console.log({username})
+        console.log({email})
+        console.log({password})
+        if(password!=confirmPassword){
+            setPopup({
+                open: true,
+                title: "Error",
+                message: "Please make sure all fields are filled in correctly."
+            });
+            errConfirmPassword()
+            return;
+            }
+        // 가입 조건 만족 시
+        else{
+            console.log("correct form");
+            // 서버로 data 전송
+            handleSubmit();
+
+
+            setPopup({
+                open: true,
+                title: "Welcome!",
+                message: "Now you are our client!",
+                callback: handleClick()
+            });
+            return;
+        }
+    }
+    
+    return (
+        <>
+        <IndexNavbar />
+        <Layout>
+            <div
+        class = "img"
+      >
+        <Popup open = {popup.open} setPopup = {setPopup} message = {popup.message} title = {popup.title} callback = {popup.callback}/>
+        <br/><br/><br/><br/><br/><br/>
+        <div class="box">
+        <br/><br/>
+            <h1 class="head"><strong> Register</strong></h1>
+            <h2 class="head2">WELCOME</h2>
+            <br/><br/>
+            <input type="text" value={username} placeholder='NAME'
+            onChange = {handleOnUser}/>
+            <br/><br/>
+            <input type="text" value={email} placeholder='EMAIL'
+            onChange = {handleOnEmail}/>
+            <br/><br/>
+            <input type="password" value={password} placeholder='PASSWORD'
+            onChange = {handleOnPassword}/>
+            <br/><br/>
+            <input type="password" value={confirmPassword} placeholder='CONFIRM PASSWORD'
+            onChange = {handleOnConfirmPassword}/>
+            <br/>
+            <br/>
+            <br/>
+            <Button className="btn-round" color="danger"
+                  onClick={() => onSubmit()}>
+                    SIGN IN
+                  </Button>
+            <br/><br/>
+            </div>
+            </div>
+        </Layout>
+        </>
+    );
+}
+export default Register;
